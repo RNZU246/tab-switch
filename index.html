@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab and Copy Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="container">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">Page Activity Monitor</h1>
+        <p class="text-gray-600 mb-6">
+            This page demonstrates the detection of tab switches and page exits.
+            Content on this page cannot be copied.
+        </p>
+
+        <div class="space-y-4 mb-6">
+            <div class="p-4 bg-blue-100 rounded-lg shadow-inner">
+                <div class="text-lg font-semibold text-blue-800">
+                    Tab Switches: <span id="tabSwitchCount" class="font-bold">0</span>
+                </div>
+            </div>
+            <div class="p-4 bg-red-100 rounded-lg shadow-inner">
+                <div class="text-lg font-semibold text-red-800">
+                    Page Exits: <span id="pageExitCount" class="font-bold">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-200 p-6 rounded-xl text-left text-gray-700 leading-relaxed select-none">
+            <h2 class="text-xl font-bold mb-2">Sample Content</h2>
+            <p>
+                This is some sample text to demonstrate the copy-paste prevention. You can try selecting this text, but you won't be able to copy or cut it. This is useful for applications where you want to protect your content from unauthorized sharing. The tab and page exit counters above will also update in real-time.
+            </p>
+            <p class="mt-4">
+                The `visibilitychange` event is a simple way to track when a user moves away from the current tab, while the `beforeunload` event helps us detect when they are about to leave the page completely.
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // Use a persistent object to store counts.
+        // In a real application, you might use a database like Firestore for this.
+        const state = {
+            tabSwitches: 0,
+            pageExits: 0
+        };
+
+        const tabSwitchElement = document.getElementById('tabSwitchCount');
+        const pageExitElement = document.getElementById('pageExitCount');
+
+        // Function to update the UI
+        function updateUI() {
+            tabSwitchElement.textContent = state.tabSwitches;
+            pageExitElement.textContent = state.pageExits;
+        }
+
+        // --- Tab Switch Detection ---
+        document.addEventListener("visibilitychange", function() {
+            // Check if the page is hidden (user switched tabs or minimized window)
+            if (document.hidden) {
+                state.tabSwitches++;
+                updateUI();
+                console.log(`Tab switched. Total: ${state.tabSwitches}`);
+            }
+        });
+
+        // --- Page Exit Detection ---
+        window.addEventListener("beforeunload", function() {
+            // Note: This event fires when the page is being closed or navigated away from.
+            // The UI will not have time to update, but the counter is incremented.
+            state.pageExits++;
+            console.log(`Page exit detected. Total: ${state.pageExits}`);
+        });
+
+        // --- Content Copy/Paste Prevention ---
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            console.log("Copying is disabled on this page.");
+        });
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            console.log("Cutting is disabled on this page.");
+        });
+        document.addEventListener('paste', function(e) {
+            e.preventDefault();
+            console.log("Pasting is disabled on this page.");
+        });
+
+        // Initial UI update
+        updateUI();
+    </script>
+</body>
+</html>
